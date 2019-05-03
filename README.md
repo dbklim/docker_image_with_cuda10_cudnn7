@@ -10,13 +10,15 @@ sudo ./install_all.sh
 ```
 После выполнения скрипта необходмо перезагрузить хост-машину. Проверить работоспособность можно следующим образом:
 ```bash
-sudo docker run --runtime=nvidia -ti --rm cuda10.0_cudnn7.5:0.1 nvidia-smi
+sudo docker run --runtime=nvidia -ti --rm cuda10.0_cudnn7.5:1.0 nvidia-smi
 ```
-Результат должен быть такой же, как и в подразделе 1 ниже.
+Результат должен быть такой же, как и в [подразделе 1](https://github.com/Desklop/Docker_image_CUDA10.0_cuDNN7.5/tree/master#1-установка-драйвера-для-видеокарты-nvidia) ниже.
+
+---
 
 # Подготовка хост-машины
 
-Перед сборкой и запуском TensorFlow в docker-образе на GPU вначале надо подготовить хост-машину. Подготовка состоит из двух этапов:
+Перед сборкой и запуском TensorFlow в docker-образе на GPU сначала надо подготовить хост-машину. Подготовка состоит из двух этапов:
 1. Установка драйвера необходимой версии для видеокарты [nvidia](https://www.nvidia.ru/Download/index.aspx?lang=ru) в ОС;
 2. Установка [nvidia-docker](https://github.com/NVIDIA/nvidia-docker).
 
@@ -95,7 +97,7 @@ sudo pkill -SIGHUP dockerd
 ```bash
 sudo docker run --runtime=nvidia --rm nvidia/cuda:10.0-base nvidia-smi
 ```
-Результат должен быть такой же, как и в подразделе 1.
+Результат должен быть такой же, как и в [подразделе 1](https://github.com/Desklop/Docker_image_CUDA10.0_cuDNN7.5/tree/master#1-установка-драйвера-для-видеокарты-nvidia).
 
 ---
 
@@ -123,6 +125,8 @@ sudo apt-get install -y nvidia-docker2
 sudo pkill -SIGHUP dockerd
 ```
 
+---
+
 # Сборка docker-образа с библиотеками CUDA 10.0 и cuDNN 7.5.0.56
 
 Что бы [TensorFlow](https://www.tensorflow.org/install/gpu) успешно запустился на GPU в docker-образе, необходимы так же библиотеки [CUDA 10.0](https://developer.nvidia.com/cuda-toolkit-archive) и [cuDNN 7.5.0.56](https://developer.nvidia.com/cudnn).
@@ -136,9 +140,11 @@ sudo docker build -t cuda10.0_cudnn7.5:1.0 .
 ```bash
 sudo docker run --runtime=nvidia -ti --rm cuda10.0_cudnn7.5:1.0 nvidia-smi
 ```
-Результат должен быть такой же, как и в подразделе 1.
+Результат должен быть такой же, как и в [подразделе 1](https://github.com/Desklop/Docker_image_CUDA10.0_cuDNN7.5/tree/master#1-установка-драйвера-для-видеокарты-nvidia).
 
 **Примечание:** размер собранного docker-образа с CUDA 10.0 и cuDNN 7.5.0 равен **3.08 Гб**.
+
+---
 
 # Сборка пользовательского образа с TensorFlow-GPU
 
