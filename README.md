@@ -1,6 +1,6 @@
 # Docker image with CUDA10.0 and cuDNN7.5 for TensorFlow-GPU/PyTorch
 
-Проект содержит bash-скрипты для подготовки хост-машины к запуску [TensorFlow](https://www.tensorflow.org/install/gpu) или [PyTorch](https://pytorch.org/) на GPU и `Dockerfile` для сборки docker-образа с библиотеками [CUDA 10.0](https://developer.nvidia.com/cuda-toolkit-archive) и [cuDNN 7.5.0.56](https://developer.nvidia.com/cudnn) (на основе dockerfiles из репозитория [nvidia](https://gitlab.com/nvidia/cuda/tree/ubuntu18.04/10.0)), на основе которого затем можно собирать любые пользовательские образы с TensorFlow-GPU (с минимальными изменениями пользовательского `Dockerfile`).
+Проект содержит bash-скрипты для подготовки хост-машины к запуску [TensorFlow](https://www.tensorflow.org/install/gpu) или [PyTorch](https://pytorch.org/) на GPU и `Dockerfile` для сборки docker-образа с библиотеками [CUDA 10.0](https://developer.nvidia.com/cuda-toolkit-archive) и [cuDNN 7.5.0.56](https://developer.nvidia.com/cudnn) (на основе dockerfiles из репозитория [nvidia](https://gitlab.com/nvidia/cuda/tree/ubuntu18.04/10.0)), на основе которого затем можно собирать любые пользовательские образы с TensorFlow-GPU или PyTorch (с минимальными изменениями пользовательского `Dockerfile`).
 
 **ВНИМАНИЕ!** Все нижеописанные инструкции проверены в Ubuntu 16.04/18.04. В других ОС работоспособность не гарантируется!
 
