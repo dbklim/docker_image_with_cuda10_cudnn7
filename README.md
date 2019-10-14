@@ -164,6 +164,11 @@ sudo docker run --runtime=nvidia -ti --rm my_image:0.1
 sudo docker run --runtime=nvidia -e NVIDIA_VISIBLE_DEVICES=0 -ti --rm my_image:0.1
 ```
 
+**ВНИМАНИЕ!** Если крайняя версия PyTorch из pip не поддерживает CUDA 10.0, можно найти подходящую версию [тут](https://download.pytorch.org/whl/cu100/torch_stable.html). Для её установки достаточно скопировать прямую ссылку на загрузку необходимой версии и выполнить (в примере PyTorch 1.3.0 для Python 3.6 и Linux):
+```bash
+pip install https://download.pytorch.org/whl/cu100/torch-1.3.0%2Bcu100-cp36-cp36m-linux_x86_64.whl
+```
+
 ---
 
 ## Динамическое выделение памяти GPU в TensorFlow-GPU
