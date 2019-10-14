@@ -1,6 +1,6 @@
-# Docker image with CUDA10.0 and cuDNN7.5 for TensorFlow-GPU
+# Docker image with CUDA10.0 and cuDNN7.5 for TensorFlow-GPU/PyTorch
 
-Проект содержит bash-скрипты для подготовки хост-машины к запуску [TensorFlow](https://www.tensorflow.org/install/gpu) на GPU и `Dockerfile` для сборки docker-образа с библиотеками [CUDA 10.0](https://developer.nvidia.com/cuda-toolkit-archive) и [cuDNN 7.5.0.56](https://developer.nvidia.com/cudnn) (на основе dockerfiles из репозитория [nvidia](https://gitlab.com/nvidia/cuda/tree/ubuntu18.04/10.0)), на основе которого затем можно собирать любые пользовательские образы с TensorFlow-GPU (с минимальными изменениями пользовательского `Dockerfile`).
+Проект содержит bash-скрипты для подготовки хост-машины к запуску [TensorFlow](https://www.tensorflow.org/install/gpu) или [PyTorch](https://pytorch.org/) на GPU и `Dockerfile` для сборки docker-образа с библиотеками [CUDA 10.0](https://developer.nvidia.com/cuda-toolkit-archive) и [cuDNN 7.5.0.56](https://developer.nvidia.com/cudnn) (на основе dockerfiles из репозитория [nvidia](https://gitlab.com/nvidia/cuda/tree/ubuntu18.04/10.0)), на основе которого затем можно собирать любые пользовательские образы с TensorFlow-GPU (с минимальными изменениями пользовательского `Dockerfile`).
 
 **ВНИМАНИЕ!** Все нижеописанные инструкции проверены в Ubuntu 16.04/18.04. В других ОС работоспособность не гарантируется!
 
@@ -18,7 +18,7 @@ sudo docker run --runtime=nvidia -ti --rm cuda10.0_cudnn7.5:1.0 nvidia-smi
 
 # Подготовка хост-машины
 
-Перед сборкой и запуском TensorFlow в docker-образе на GPU сначала надо подготовить хост-машину. Подготовка состоит из двух этапов:
+Перед сборкой и запуском TensorFlow/PyTorch в docker-образе на GPU сначала надо подготовить хост-машину. Подготовка состоит из двух этапов:
 1. Установка драйвера необходимой версии для видеокарты [nvidia](https://www.nvidia.ru/Download/index.aspx?lang=ru) в ОС;
 2. Установка [nvidia-docker](https://github.com/NVIDIA/nvidia-docker).
 
@@ -129,7 +129,7 @@ sudo pkill -SIGHUP dockerd
 
 # Сборка docker-образа с библиотеками CUDA 10.0 и cuDNN 7.5.0.56
 
-Что бы [TensorFlow](https://www.tensorflow.org/install/gpu) успешно запустился на GPU в docker-образе, необходимы так же библиотеки [CUDA 10.0](https://developer.nvidia.com/cuda-toolkit-archive) и [cuDNN 7.5.0.56](https://developer.nvidia.com/cudnn).
+Что бы [TensorFlow](https://www.tensorflow.org/install/gpu) или [PyTorch](https://pytorch.org/) успешно запустились на GPU в docker-контейнере, необходимы так же библиотеки [CUDA 10.0](https://developer.nvidia.com/cuda-toolkit-archive) и [cuDNN 7.5.0.56](https://developer.nvidia.com/cudnn).
 
 Для сборки отдельного docker-образа с CUDA 10.0 и cuDNN 7.5.0 на основе содержащегося в проекте `Dockerfile` (в качестве исходного образа при сборке используется Ubuntu 18.04) нужно выполнить в терминале, находясь в папке с `Dockerfile`, следующее:
 ```bash
@@ -142,17 +142,19 @@ sudo docker run --runtime=nvidia -ti --rm cuda10.0_cudnn7.5:1.0 nvidia-smi
 ```
 Результат должен быть такой же, как и в [подразделе 1](https://github.com/Desklop/Docker_image_CUDA10.0_cuDNN7.5/tree/master#1-установка-драйвера-для-видеокарты-nvidia).
 
-**Примечание:** размер собранного docker-образа с CUDA 10.0 и cuDNN 7.5.0 равен **3.08 Гб**.
+**Примечание:** размер собранного docker-образа с CUDA 10.0 и cuDNN 7.5.0 равен **3.1 Гб**.
 
 ---
 
-# Сборка пользовательского образа с TensorFlow-GPU
+# Сборка пользовательского образа с TensorFlow-GPU/PyTorch
 
 Для сборки любого пользовательского образа с использованием [TensorFlow-GPU](https://www.tensorflow.org/install/gpu) нужно:
 1. Изменить образ, на основе которого собирается пользовательский образ, на созданный выше `cuda10.0_cudnn7.5:1.0` (если при создании не было указано другое имя);
 2. При установке пакетов для python изменить `tensorflow` на `tensorflow-gpu`.
 
-Что бы Tensorflow-GPU в пользовательском образе имел доступ к видеокарте, при запуске образа необходимо передать параметр `--runtime=nvidia`, например:
+Для сборки пользовательского образа с использованием [PyTorch](https://pytorch.org/) нужно только изменить образ, на основе которого собирается ваш образ, на созданный выше `cuda10.0_cudnn7.5:1.0` (если при создании не было указано другое имя) и предусмотреть запуск на GPU с использованием CUDA в вашем исходном коде.
+
+Что бы Tensorflow-GPU/PyTorch в пользовательском образе имел доступ к видеокарте, при запуске образа необходимо передать параметр `--runtime=nvidia`, например:
 ```bash
 sudo docker run --runtime=nvidia -ti --rm my_image:0.1
 ```
