@@ -1,188 +1,220 @@
-# Docker image with CUDA10.0 and cuDNN7.5 for TensorFlow-GPU/PyTorch
+# Docker image with CUDA 10 and cuDNN 7
 
-Проект содержит bash-скрипты для подготовки хост-машины к запуску [TensorFlow](https://www.tensorflow.org/install/gpu) или [PyTorch](https://pytorch.org/) на GPU и `Dockerfile` для сборки docker-образа с библиотеками [CUDA 10.0](https://developer.nvidia.com/cuda-toolkit-archive) и [cuDNN 7.5.0.56](https://developer.nvidia.com/cudnn) (на основе dockerfiles из репозитория [nvidia](https://gitlab.com/nvidia/cuda/tree/ubuntu18.04/10.0)), на основе которого затем можно собирать любые пользовательские образы с TensorFlow-GPU или PyTorch (с минимальными изменениями пользовательского `Dockerfile`).
+Проект содержит **bash-скрипты для подготовки хост-машины** для предоставления доступа **к GPU в [docker](https://docs.docker.com/) контейнерах**. Подготовка состоит из:
 
-**ВНИМАНИЕ!** Все нижеописанные инструкции проверены в Ubuntu 16.04/18.04. В других ОС работоспособность не гарантируется!
+1. Установка драйвера для [NVIDIA GPU](https://www.nvidia.com/en-gb/graphics-cards/) необходимой версии
+2. Установка [nvidia-container-toolkit](https://github.com/NVIDIA/nvidia-docker)
+3. Сборка базового docker образа с [CUDA 10.X](https://developer.nvidia.com/cuda-zone) и [cuDNN 7.6](https://developer.nvidia.com/cudnn)
 
-Для выполнения всех действий в чистой ОС (требуется установленный docker) можно воспользоваться скриптом `install_all.sh` (выполнит установку nvidia-driver-410, nvidia-docker и сборку docker-образа с CUDA 10.0 и cuDNN 7.5.0.56 на основе Ubuntu 18.04 с меткой `cuda10.0_cudnn7.5:1.0`). Например, так:
+**Внимание!** Все нижеописанные **инструкции** предназначены **для Ubuntu 16.04-19.10**. В других ОС работоспособность не гарантируется!
+
+**Примечание:** после клонирования проекта, скорее всего нужно будет **предоставить скриптам права на запуск**. Это можно сделать следующим способом (находясь в папке с проектом):
+
 ```bash
-sudo ./install_all.sh
+chmod +x *.sh
 ```
-После выполнения скрипта необходмо перезагрузить хост-машину. Проверить работоспособность можно следующим образом:
-```bash
-sudo docker run --runtime=nvidia -ti --rm cuda10.0_cudnn7.5:1.0 nvidia-smi
-```
-Результат должен быть такой же, как и в [подразделе 1](https://github.com/Desklop/Docker_image_CUDA10.0_cuDNN7.5/tree/master#1-установка-драйвера-для-видеокарты-nvidia) ниже.
 
 ---
 
-# Подготовка хост-машины
+## Зависимости
 
-Перед сборкой и запуском TensorFlow/PyTorch в docker-образе на GPU сначала надо подготовить хост-машину. Подготовка состоит из двух этапов:
-1. Установка драйвера необходимой версии для видеокарты [nvidia](https://www.nvidia.ru/Download/index.aspx?lang=ru) в ОС;
-2. Установка [nvidia-docker](https://github.com/NVIDIA/nvidia-docker).
+Для успешной подготовки хост-машины **требуется** установленный **[Docker](https://docs.docker.com/) версии [19.03](https://docs.docker.com/engine/reference/commandline/version/) или выше**.
+
+Для установки Docker в Ubuntu 16.04-19.10 воспользуйтесь [официальной инструкцией](https://docs.docker.com/install/linux/docker-ce/ubuntu/) или скриптом [`install_docker-ubuntu.sh`](https://github.com/Desklop/Docker_image_with_CUDA10_cuDNN7/blob/master/install_docker-ubuntu.sh):
+
+```bash
+sudo ./install_docker-ubuntu.sh
+```
+
+Так же можно вручную в терминале выполнить (краткая выжимка из официальной инструкции):
+
+```bash
+sudo apt-get -y install apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo apt-key fingerprint 0EBFCD88
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" -y
+sudo apt-get -y update
+sudo apt-get -y install docker-ce docker-ce-cli containerd.io docker-compose
+```
 
 ---
 
-### 1. Установка драйвера для видеокарты nvidia
+## Подготовка хост-машины одним скриптом
 
-Для работы с [CUDA 10.0](https://developer.nvidia.com/cuda-toolkit-archive) необходим драйвер версии 410.104. Установить его можно следующими способами:
-1. Самостоятельно, загрузив необходимый пакет с официального сайта [nvidia](https://www.nvidia.ru/Download/index.aspx?lang=ru);
+Для **выполнения всех действий сразу** можно воспользоваться скриптом [`install_all.sh`](https://github.com/Desklop/Docker_image_with_CUDA10_cuDNN7/blob/master/install_all.sh). Поддерживается **`CUDA` версии `10.0`, `10.1` и `10.2`**. Для того, что бы указать конкретную версию, нужно **передать аргумент при запуске**:
 
-2. Воспользоваться скриптом `install_nvidia-driver-410.sh`, для этого необходимо перейти в терминале в папку со скриптом и выполнить:
 ```bash
-sudo ./install_nvidia-driver-410.sh
+sudo ./install_all.sh [cuda10.0|cuda10.1|cuda10.2]
 ```
 
-3. Вручную в терминале выполнить следующие действия:
+Значения аргумента (если не передавать аргумент - использовать значение `cuda10.2`):
+
+- `cuda10.0`: установка `nvidia-driver-410`, `nvidia-container-toolkit` и сборка docker-образа с `CUDA 10.0` и `cuDNN 7.6` на основе Ubuntu 19.10 с меткой `cuda10.0_cudnn7.6:devel`
+- `cuda10.1`: установка `nvidia-driver-418`, `nvidia-container-toolkit` и сборка docker-образа с `CUDA 10.1` и `cuDNN 7.6` на основе Ubuntu 19.10 с меткой `cuda10.1_cudnn7.6:devel`
+- `cuda10.2`: установка `nvidia-driver-440`, `nvidia-container-toolkit` и сборка docker-образа с `CUDA 10.2` и `cuDNN 7.6` на основе Ubuntu 19.10 с меткой `cuda10.2_cudnn7.6:devel`
+
+После выполнения скрипта необходмо **перезагрузить хост-машину**. Проверить работоспособность можно следующим образом:
+
+```bash
+sudo docker run --gpus all -ti --rm cuda10.2_cudnn7.6:devel nvidia-smi
+```
+
+Результат должен быть такой же, как и в [разделе 1](https://github.com/Desklop/Docker_image_with_CUDA10_cuDNN7/tree/master#1-установка-драйвера-для-видеокарты-nvidia) ниже.
+
+---
+
+## 1. Установка драйвера для видеокарты NVIDIA
+
+Для работы с [CUDA 10.X](https://developer.nvidia.com/cuda-toolkit-archive) необходим **драйвер для видеокарты** определённой версии ([источник](https://github.com/NVIDIA/nvidia-docker/wiki/CUDA#requirements)):
+
+- CUDA 10.0: драйвер версии 410
+- CUDA 10.1: драйвер версии 418
+- CUDA 10.2: драйвер версии 440
+
+**Установить драйвер** нужной версии можно следующими способами:
+
+1. Самостоятельно, загрузив необходимый пакет с официального сайта [nvidia](https://www.nvidia.ru/Download/index.aspx?lang=ru)
+2. Воспользоваться скриптом [`install_nvidia-driver.sh`](https://github.com/Desklop/Docker_image_with_CUDA10_cuDNN7/blob/master/install_nvidia-driver.sh) (если не передавать аргумент - использовать значение `cuda10.2`):
+
+```bash
+sudo ./install_nvidia-driver.sh [cuda10.0|cuda10.1|cuda10.2]
+```
+
+3. Вручную в терминале выполнить:
+
 ```bash
 sudo add-apt-repository -y ppa:graphics-drivers/ppa
 sudo apt-get -y update
-sudo apt-get -y install nvidia-driver-410
+sudo apt-get -y install nvidia-driver-440
 ```
 
-После установки необходимо перезагрузить хост-машину. Что бы убедиться, что драйвер успешно установлен, можно ввести в терминале `nvidia-smi`. Результат должен быть примерно следующий:
-```
-Fri May  3 16:06:10 2019
+После установки необходимо **перезагрузить хост-машину**. Что бы убедиться, что драйвер успешно установлен, можно **вызвать в терминале `nvidia-smi`**. Результат должен быть примерно следующий:
+
+```bash
 +-----------------------------------------------------------------------------+
-| NVIDIA-SMI 410.104      Driver Version: 410.104      CUDA Version: 10.0     |
+| NVIDIA-SMI 440.59       Driver Version: 440.59       CUDA Version: 10.2     |
 |-------------------------------+----------------------+----------------------+
 | GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
 | Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
 |===============================+======================+======================|
-|   0  GeForce GTX 1070    Off  | 00000000:01:00.0  On |                  N/A |
-|  0%   44C    P5    16W / 180W |   1277MiB /  8116MiB |      3%      Default |
+|   0  GeForce RTX 208...  Off  | 00000000:08:00.0 Off |                  N/A |
+| 39%   42C    P0    18W / 250W |      0MiB / 11019MiB |      0%      Default |
 +-------------------------------+----------------------+----------------------+
-                                                                               
+
 +-----------------------------------------------------------------------------+
 | Processes:                                                       GPU Memory |
 |  GPU       PID   Type   Process name                             Usage      |
 |=============================================================================|
-|    0      1908      G   /usr/lib/xorg/Xorg                            26MiB |
-|    0      1985      G   /usr/bin/gnome-shell                          51MiB |
-|    0      4112      G   /usr/lib/xorg/Xorg                           367MiB |
-|    0      4226      G   /usr/bin/gnome-shell                         295MiB |
-|    0     27572      G   /opt/teamviewer/tv_bin/TeamViewer             11MiB |
+|  No running processes found                                                 |
 +-----------------------------------------------------------------------------+
 ```
 
 ---
 
-### 2. Установка [nvidia-docker](https://github.com/NVIDIA/nvidia-docker)
+## 2. Установка [nvidia-container-toolkit](https://github.com/NVIDIA/nvidia-docker)
 
-Для того, что бы видеокарта была доступна внутри docker-образа, необходимо установить [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). Сделать это можно следующими способами:
-1. Воспользоваться скриптом `install_nvidia-docker2.sh`, для этого необходимо перейти в терминале в папку со скриптом и выполнить:
+Что бы видеокарта была доступна в docker-контейнере, необходимо **установить [nvidia-container-toolkit](https://github.com/NVIDIA/nvidia-docker)**. Сделать это можно следующими способами:
+
+1. Воспользоваться скриптом [`install_nvidia-container-toolkit.sh`](https://github.com/Desklop/Docker_image_with_CUDA10_cuDNN7/blob/master/install_nvidia-container-toolkit.sh):
+
 ```bash
-sudo ./install_nvidia-docker2.sh
+sudo ./install_nvidia-container-toolkit.sh
 ```
 
-2. Вручную в терминале выполнить следующие действия (взято [отсюда](https://github.com/NVIDIA/nvidia-docker#ubuntu-140416041804-debian-jessiestretch)):
+2. Вручную в терминале выполнить (краткая выжимка из [репозитория](https://github.com/NVIDIA/nvidia-docker#ubuntu-16041804-debian-jessiestretchbuster)):
+
 ```bash
-# If you have nvidia-docker 1.0 installed: we need to remove it and all existing GPU containers
-docker volume ls -q -f driver=nvidia-docker | xargs -r -I{} -n1 docker ps -q -a -f volume={} | xargs -r docker rm -f
-sudo apt-get purge -y nvidia-docker
-
-# Add the package repositories
-curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
 distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
 curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
-sudo apt-get update
-
-# Install nvidia-docker2 and reload the Docker daemon configuration
-sudo apt-get install -y nvidia-docker2
-sudo pkill -SIGHUP dockerd
+sudo apt-get -y update
+sudo apt-get -y install nvidia-container-toolkit
+sudo systemctl restart docker
 ```
 
 Что бы убедиться, что установка прошла успешно, можно выполнить в терминале:
+
 ```bash
-sudo docker run --runtime=nvidia --rm nvidia/cuda:10.0-base nvidia-smi
+sudo docker run --gpus all -ti --rm nvidia/cuda:10.2-base nvidia-smi
 ```
-Результат должен быть такой же, как и в [подразделе 1](https://github.com/Desklop/Docker_image_CUDA10.0_cuDNN7.5/tree/master#1-установка-драйвера-для-видеокарты-nvidia).
+
+Результат должен быть такой же, как и в [подразделе 1](https://github.com/Desklop/Docker_image_with_CUDA10_cuDNN7/tree/master#1-установка-драйвера-для-видеокарты-nvidia).
 
 ---
 
-В процессе установки может возникнуть следующая ошибка (с которой столкнулся я):
+## 3. Сборка docker-образа с CUDA 10.X и cuDNN 7.6
+
+Для работы с библиотеками машинного обучения на GPU, такими как [TensorFlow](https://www.tensorflow.org/) и [PyTorch](https://pytorch.org/), так же **необходимы библиотеки [CUDA 10.X](https://developer.nvidia.com/cuda-toolkit-archive) и [cuDNN 7.6](https://developer.nvidia.com/cudnn)**. Для упрощения сборки пользовательских docker-образов, можно **использовать заранее собранный docker-образ** с данными библиотеками **в качестве основы** (т.е. в качестве базового образа).
+
+В проекте доступны **2 вида Dockerfile**: `runtime` и `devel`. Образы с меткой `runtime` используются для **запуска** уже **готовых проектов** на GPU, а с меткой `devel` - для **сборки проектов из исходников** с поддержкой GPU (подробно про разницу между ними можно посмотреть в репозитории [nvidia-docker](https://github.com/NVIDIA/nvidia-docker/wiki/CUDA#description)).
+
+**Для сборки docker-образа с `CUDA 10.2` и `cuDNN 7.6`**, находясь в папке с проектом, нужно выполнить (`-f Dockerfile_cuda10.2_runtime` — использовать файл `Dockerfile_cuda10.2_runtime` в качестве Dockerfile для сборки образа, `-t` — запуск в терминале, `.` — директория, из которой вызывается docker build (точка — значит в текущей директории находятся все файлы для образа), `cuda10.2_cudnn7.6:runtime` — метка образа и его версия):
+
 ```bash
-nvidia-docker2 : Зависит: docker-ce (= 5:18.09.5~3-0~ubuntu-bionic) но он не может быть установлен или
-                          docker-ee (= 5:18.09.5~3-0~ubuntu-bionic) но он не может быть установлен
-E: Невозможно исправить ошибки: у вас зафиксированы сломанные пакеты.
+sudo docker build -f Dockerfile_cuda10.2_runtime -t cuda10.2_cudnn7.6:runtime .
 ```
 
-Для её решения можно воспользоваться скриптом `fix_install_nvidia-docker2.sh` или вручную в терминале выполнить следующие действия (взято [отсюда](https://github.com/NVIDIA/nvidia-docker/issues/607)):
+В качестве **базовой ОС** для образа используется **Ubuntu 19.10**.
+
+Для сборки docker-образов **с другими версиями CUDA** в проекте присутствуют **соответствующие Dockerfile**:
+
+- CUDA 10.0: [Dockerfile_cuda10.0_runtime](https://github.com/Desklop/Docker_image_with_CUDA10_cuDNN7/blob/master/Dockerfile_cuda10.0_runtime) и [Dockerfile_cuda10.0_devel](https://github.com/Desklop/Docker_image_with_CUDA10_cuDNN7/blob/master/Dockerfile_cuda10.0_devel)
+- CUDA 10.1: [Dockerfile_cuda10.1_runtime](https://github.com/Desklop/Docker_image_with_CUDA10_cuDNN7/blob/master/Dockerfile_cuda10.1_runtime) и [Dockerfile_cuda10.1_devel](https://github.com/Desklop/Docker_image_with_CUDA10_cuDNN7/blob/master/Dockerfile_cuda10.1_devel)
+- CUDA 10.2: [Dockerfile_cuda10.2_runtime](https://github.com/Desklop/Docker_image_with_CUDA10_cuDNN7/blob/master/Dockerfile_cuda10.2_runtime) и [Dockerfile_cuda10.2_devel](https://github.com/Desklop/Docker_image_with_CUDA10_cuDNN7/blob/master/Dockerfile_cuda10.2_devel)
+
+Данные Dockerfiles сделаны на основе Dockerfiles из репозитория [nvidia](https://gitlab.com/nvidia/container-images/cuda/-/tree/master/dist%2Fubuntu18.04).
+
+После успешной сборки, проверить работоспособность образа можно следующим образом (`--gpus all` - предоставить контейнеру доступ ко всем GPU на хост-машине, `-t` — запуск терминала, `-i` — интерактивный режим, `--rm` — удалить контейнер после завершения его работы):
+
 ```bash
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-sudo apt-key fingerprint 0EBFCD88
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-sudo apt-get update
-sudo apt-get install docker-ce
-sudo service docker restart
+sudo docker run --gpus all -ti --rm cuda10.2_cudnn7.6:runtime nvidia-smi
 ```
 
-После чего скрипт `install_nvidia-docker2.sh` необходимо выполнить заново, или, если установка проводилась вручную, продолжить её следующими действиями:
-```bash
-# Install nvidia-docker2 and reload the Docker daemon configuration
-sudo apt-get install -y nvidia-docker2
-sudo pkill -SIGHUP dockerd
-```
+Результат должен быть такой же, как и в [подразделе 1](https://github.com/Desklop/Docker_image_with_CUDA10_cuDNN7/tree/master#1-установка-драйвера-для-видеокарты-nvidia).
+
+**Примечание:** размер собранного docker-образа с `CUDA 10.X` и `cuDNN 7.6` равен **1.3-1.8 Гб** для `runtime` и **3.1-3.8 Гб** для `devel`.
 
 ---
 
-# Сборка docker-образа с библиотеками CUDA 10.0 и cuDNN 7.5.0.56
+### Сборка пользовательского docker-образа с с CUDA 10.X и cuDNN 7.6
 
-Что бы [TensorFlow](https://www.tensorflow.org/install/gpu) или [PyTorch](https://pytorch.org/) успешно запустились на GPU в docker-контейнере, необходимы так же библиотеки [CUDA 10.0](https://developer.nvidia.com/cuda-toolkit-archive) и [cuDNN 7.5.0.56](https://developer.nvidia.com/cudnn).
+**Для сборки** любого **пользовательского docker-образа с** библиотеками **`CUDA 10.X` и `cuDNN 7.6`** нужно:
 
-Для сборки отдельного docker-образа с CUDA 10.0 и cuDNN 7.5.0 на основе содержащегося в проекте `Dockerfile` (в качестве исходного образа при сборке используется Ubuntu 18.04) нужно выполнить в терминале, находясь в папке с `Dockerfile`, следующее:
+1. Изменить образ, на основе которого собирается пользовательский образ, на созданный ранее `cuda10.2_cudnn7.5:runtime`
+2. При установке пакетов для Python использовать версии библиотек для работы на GPU, например, вместо TensorFlow использовать [TensorFlow-GPU](https://www.tensorflow.org/install/gpu)
+3. Предусмотреть в исходном коде запускаемого в docker-контейнере проекта обнаружение и использование GPU
+
+Что бы docker-образ имел доступ к видеокарте, **при запуске** образа необходимо **передать параметр `--gpus all`**, например:
+
 ```bash
-sudo docker build -t cuda10.0_cudnn7.5:1.0 .
+sudo docker run --gpus all -ti --rm my_image:version
 ```
 
-После успешной сборки, проверить работоспособность образа можно следующим образом:
+Параметр `--gpus all` предоставит контейнеру доступ сразу ко всем имеющимся на хост-машине видеокартам. Что бы указать, сколько видеокарт использовать или какие именно, нужно вместо `all` передать `2` (использовать первые 2 видеокарты) или `"device=2,3"` (использовать 2 и 3 видеокарту), например:
+
 ```bash
-sudo docker run --runtime=nvidia -ti --rm cuda10.0_cudnn7.5:1.0 nvidia-smi
-```
-Результат должен быть такой же, как и в [подразделе 1](https://github.com/Desklop/Docker_image_CUDA10.0_cuDNN7.5/tree/master#1-установка-драйвера-для-видеокарты-nvidia).
-
-**Примечание:** размер собранного docker-образа с CUDA 10.0 и cuDNN 7.5.0 равен **3.1 Гб**.
-
----
-
-# Сборка пользовательского образа с TensorFlow-GPU/PyTorch
-
-Для сборки любого пользовательского образа с использованием [TensorFlow-GPU](https://www.tensorflow.org/install/gpu) нужно:
-1. Изменить образ, на основе которого собирается пользовательский образ, на созданный выше `cuda10.0_cudnn7.5:1.0` (если при создании не было указано другое имя);
-2. При установке пакетов для python изменить `tensorflow` на `tensorflow-gpu`.
-
-Для сборки пользовательского образа с использованием [PyTorch](https://pytorch.org/) нужно только изменить образ, на основе которого собирается ваш образ, на созданный выше `cuda10.0_cudnn7.5:1.0` (если при создании не было указано другое имя) и предусмотреть запуск на GPU с использованием CUDA в вашем исходном коде.
-
-Что бы Tensorflow-GPU/PyTorch в пользовательском образе имел доступ к видеокарте, при запуске образа необходимо передать параметр `--runtime=nvidia`, например:
-```bash
-sudo docker run --runtime=nvidia -ti --rm my_image:0.1
+sudo docker run --gpus '"device=1,2"' -ti --rm my_image:version
 ```
 
-**ВНИМАНИЕ!** По умолчанию Tensorflow-GPU в пользовательском образе будут доступны все имеющиеся видеокарты. Если их больше одной, будет автоматически выбрана та, порядковый номер в названии которой наименьший. Если необходимо запустить TensorFlow-GPU на конкретной видеокарте, при запуске пользовательского образа необходимо дополнительно передать параметр `-e NVIDIA_VISIBLE_DEVICES=0`, где `0` - порядковый номер желаемой видеокарты, которая будет доступна TensorFlow-GPU. Например:
-```bash
-sudo docker run --runtime=nvidia -e NVIDIA_VISIBLE_DEVICES=0 -ti --rm my_image:0.1
-```
-
-**ВНИМАНИЕ!** Если крайняя версия PyTorch из pip не поддерживает CUDA 10.0, можно найти подходящую версию [тут](https://download.pytorch.org/whl/cu100/torch_stable.html). Для её установки достаточно скопировать прямую ссылку на загрузку необходимой версии и выполнить (в примере PyTorch 1.3.0 для Python 3.6 и Linux):
-```bash
-pip install https://download.pytorch.org/whl/cu100/torch-1.3.0%2Bcu100-cp36-cp36m-linux_x86_64.whl
-```
+Более подробно про параметр `--gpus` можно посмотреть в репозитории [`nvidia-docker`](https://github.com/NVIDIA/nvidia-docker#usage).
 
 ---
 
 ## Динамическое выделение памяти GPU в TensorFlow-GPU
 
-По умолчанию TensorFlow-GPU занимает всю доступную видеопамять, по этому не получится одновременно запустить несколько docker-образов, использующих TensorFlow-GPU. Если ваш проект написан на Python и для работы с TensorFlow вы используете [Keras](https://keras.io/), можно исправить это следующим образом (данный фрагмент кода необходимо добавить в самое начало `.py` файла, перед использованием TensorFlow-GPU) (взято [отсюда](https://www.tensorflow.org/guide/using_gpu?hl=ru#allowing_gpu_memory_growth)):
+По умолчанию **[TensorFlow-GPU](https://www.tensorflow.org/install/gpu) использует всю** доступную **видеопамять**, по этому не получится одновременно запустить несколько docker-образов, использующих [TensorFlow-GPU](https://www.tensorflow.org/install/gpu) на одном GPU.
+
+Если проект написан на Python и для работы с TensorFlow используется [Keras](https://keras.io/), **можно** это **исправить** следующим образом (данный фрагмент кода необходимо добавить в самое начало `.py` файла, перед первым использованием TensorFlow-GPU) ([источник](https://www.tensorflow.org/guide/using_gpu?hl=ru#allowing_gpu_memory_growth)):
+
 ```python
 import tensorflow as tf
 from keras.backend.tensorflow_backend import set_session
 
-# Необходимо, что бы TensorFlow использовал столько памяти GPU, сколько ему реально нужно, а не всю доступную
+# Включение динамического выделения памяти GPU в TensorFlow
 config = tf.ConfigProto()
-config.gpu_options.allow_growth = True  # динамическое выделение памяти GPU
+config.gpu_options.allow_growth = True
 
-sess = tf.Session(config=config)
+sess = tf.Session(config=config)  # применение новой конфигурации для сессии TensorFlow
 set_session(sess)  # установка данной сессии TensorFlow в качестве основной для Keras
 ```
 
