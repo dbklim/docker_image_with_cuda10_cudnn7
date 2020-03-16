@@ -176,7 +176,7 @@ sudo docker run --gpus all -ti --rm cuda10.2_cudnn7.6:runtime nvidia-smi
 
 ---
 
-### Сборка пользовательского docker-образа с с CUDA 10.X и cuDNN 7.6
+### Сборка пользовательского docker-образа с CUDA 10.X и cuDNN 7.6
 
 **Для сборки** любого **пользовательского docker-образа с** библиотеками **`CUDA 10.X` и `cuDNN 7.6`** нужно:
 
