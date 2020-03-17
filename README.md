@@ -41,7 +41,7 @@ sudo apt-get -y install docker-ce docker-ce-cli containerd.io docker-compose
 
 ## Подготовка хост-машины одним скриптом
 
-Для **выполнения всех действий сразу** можно воспользоваться скриптом [`install_all.sh`](https://github.com/Desklop/Docker_image_with_CUDA10_cuDNN7/blob/master/install_all.sh). Поддерживается **`CUDA` версии `10.0`, `10.1` и `10.2`**. Для того, что бы указать конкретную версию, нужно **передать аргумент при запуске**:
+Для **выполнения всех действий сразу** можно воспользоваться скриптом [`install_all.sh`](https://github.com/Desklop/Docker_image_with_CUDA10_cuDNN7/blob/master/install_all.sh). Поддерживается **`CUDA` версии `10.0`, `10.1` и `10.2`**. Для того, что бы указать конкретную версию `CUDA`, нужно **передать аргумент при запуске**:
 
 ```bash
 sudo ./install_all.sh [cuda10.0|cuda10.1|cuda10.2]
@@ -49,8 +49,8 @@ sudo ./install_all.sh [cuda10.0|cuda10.1|cuda10.2]
 
 Значения аргумента (если не передавать аргумент - использовать значение `cuda10.2`):
 
-- `cuda10.0`: установка `nvidia-driver-410`, `nvidia-container-toolkit` и сборка docker-образа с `CUDA 10.0` и `cuDNN 7.6` на основе Ubuntu 19.10 с меткой `cuda10.0_cudnn7.6:devel`
-- `cuda10.1`: установка `nvidia-driver-418`, `nvidia-container-toolkit` и сборка docker-образа с `CUDA 10.1` и `cuDNN 7.6` на основе Ubuntu 19.10 с меткой `cuda10.1_cudnn7.6:devel`
+- `cuda10.0`: установка `nvidia-driver-440`, `nvidia-container-toolkit` и сборка docker-образа с `CUDA 10.0` и `cuDNN 7.6` на основе Ubuntu 19.10 с меткой `cuda10.0_cudnn7.6:devel`
+- `cuda10.1`: установка `nvidia-driver-440`, `nvidia-container-toolkit` и сборка docker-образа с `CUDA 10.1` и `cuDNN 7.6` на основе Ubuntu 19.10 с меткой `cuda10.1_cudnn7.6:devel`
 - `cuda10.2`: установка `nvidia-driver-440`, `nvidia-container-toolkit` и сборка docker-образа с `CUDA 10.2` и `cuDNN 7.6` на основе Ubuntu 19.10 с меткой `cuda10.2_cudnn7.6:devel`
 
 После выполнения скрипта необходмо **перезагрузить хост-машину**. Проверить работоспособность можно следующим образом:
@@ -65,19 +65,19 @@ sudo docker run --gpus all -ti --rm cuda10.2_cudnn7.6:devel nvidia-smi
 
 ## 1. Установка драйвера для видеокарты NVIDIA
 
-Для работы с [CUDA 10.X](https://developer.nvidia.com/cuda-toolkit-archive) необходим **драйвер для видеокарты** определённой версии ([источник](https://github.com/NVIDIA/nvidia-docker/wiki/CUDA#requirements)):
+Для работы с [CUDA 10.X](https://developer.nvidia.com/cuda-toolkit-archive) необходим **драйвер для видеокарты** определённой версии ([источник](https://docs.nvidia.com/deploy/cuda-compatibility/index.html#binary-compatibility__table-toolkit-driver)):
 
-- CUDA 10.0: драйвер версии 410
-- CUDA 10.1: драйвер версии 418
-- CUDA 10.2: драйвер версии 440
+- CUDA 10.0: драйвер версии 410.48 или выше
+- CUDA 10.1: драйвер версии 418.39 или выше
+- CUDA 10.2: драйвер версии 440.33 или выше
 
 **Установить драйвер** нужной версии можно следующими способами:
 
 1. Самостоятельно, загрузив необходимый пакет с официального сайта [nvidia](https://www.nvidia.ru/Download/index.aspx?lang=ru)
-2. Воспользоваться скриптом [`install_nvidia-driver.sh`](https://github.com/Desklop/Docker_image_with_CUDA10_cuDNN7/blob/master/install_nvidia-driver.sh) (если не передавать аргумент - использовать значение `cuda10.2`):
+2. Воспользоваться скриптом [`install_nvidia-driver.sh`](https://github.com/Desklop/Docker_image_with_CUDA10_cuDNN7/blob/master/install_nvidia-driver.sh), который в качестве аргумента принимает версию драйвера (если не передавать аргумент - установить версию `440`):
 
 ```bash
-sudo ./install_nvidia-driver.sh [cuda10.0|cuda10.1|cuda10.2]
+sudo ./install_nvidia-driver.sh [410|418|440|...]
 ```
 
 3. Вручную в терминале выполнить:
