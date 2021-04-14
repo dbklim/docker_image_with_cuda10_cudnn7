@@ -6,7 +6,7 @@
 2. Установка [nvidia-container-toolkit](https://github.com/NVIDIA/nvidia-docker)
 3. Сборка базового docker образа с [CUDA 10.X](https://developer.nvidia.com/cuda-zone) и [cuDNN 7.6](https://developer.nvidia.com/cudnn)
 
-**Внимание!** Все нижеописанные **инструкции** предназначены **для Ubuntu 16.04-19.10**. В других ОС работоспособность не гарантируется!
+**Внимание!** Все нижеописанные **инструкции** предназначены **для Ubuntu 16.04-20.04**. В других ОС работоспособность не гарантируется!
 
 **Примечание:** после клонирования проекта, скорее всего нужно будет **предоставить скриптам права на запуск**. Это можно сделать следующим способом (находясь в папке с проектом):
 
@@ -20,7 +20,7 @@ chmod +x *.sh
 
 Для успешной подготовки хост-машины **требуется** установленный **[Docker](https://docs.docker.com/) версии [19.03](https://docs.docker.com/engine/reference/commandline/version/) или выше**.
 
-Для установки Docker в Ubuntu 16.04-19.10 воспользуйтесь [официальной инструкцией](https://docs.docker.com/install/linux/docker-ce/ubuntu/) или скриптом [`install_docker-ubuntu.sh`](https://github.com/Desklop/Docker_image_with_CUDA10_cuDNN7/blob/master/install_docker-ubuntu.sh):
+Для установки Docker в Ubuntu 16.04-20.04 воспользуйтесь [официальной инструкцией](https://docs.docker.com/install/linux/docker-ce/ubuntu/) или скриптом [`install_docker-ubuntu.sh`](https://github.com/Desklop/Docker_image_with_CUDA10_cuDNN7/blob/master/install_docker-ubuntu.sh):
 
 ```bash
 sudo ./install_docker-ubuntu.sh
@@ -154,7 +154,7 @@ sudo docker run --gpus all -ti --rm nvidia/cuda:10.2-base nvidia-smi
 sudo docker build -f Dockerfile_cuda10.2_runtime -t cuda10.2_cudnn7.6:runtime .
 ```
 
-В качестве **базовой ОС** для образа используется **Ubuntu 19.10**.
+В качестве **базовой ОС** для образа используется **Ubuntu 20.04**.
 
 Для сборки docker-образов **с другими версиями CUDA** в проекте присутствуют **соответствующие Dockerfile**:
 
@@ -180,7 +180,7 @@ sudo docker run --gpus all -ti --rm cuda10.2_cudnn7.6:runtime nvidia-smi
 
 **Для сборки** любого **пользовательского docker-образа с** библиотеками **`CUDA 10.X` и `cuDNN 7.6`** нужно:
 
-1. Изменить образ, на основе которого собирается пользовательский образ, на созданный ранее `cuda10.2_cudnn7.5:runtime`
+1. Изменить образ, на основе которого собирается пользовательский образ, на созданный ранее `cuda10.2_cudnn7.6:runtime`
 2. При установке пакетов для Python использовать версии библиотек для работы на GPU, например, вместо TensorFlow использовать [TensorFlow-GPU](https://www.tensorflow.org/install/gpu)
 3. Предусмотреть в исходном коде запускаемого в docker-контейнере проекта обнаружение и использование GPU
 

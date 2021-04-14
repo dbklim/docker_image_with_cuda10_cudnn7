@@ -1,5 +1,6 @@
-FROM ubuntu:19.10
-MAINTAINER Vlad Klim 'vladsklim@gmail.com'
+FROM ubuntu:20.04
+LABEL description="Base docker image with CUDA 10.2 and cuDNN 7.6 for performing compute in containers on NVIDIA GPU."
+LABEL maintainer="Vlad Klim, vladsklim@gmail.com"
 
 # Packages versions
 ENV CUDA_VERSION=10.2.89 \ 
